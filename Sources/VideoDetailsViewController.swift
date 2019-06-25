@@ -125,7 +125,7 @@ class VideoDetailsViewController: BaseViewController {
         }
         
         mainView.onAddComment = { comment in
-            let vc = CommentReplyViewController(with: self.colorScheme, video: self.data, comment: comment, moduleId: self.moduleId)
+            let vc = CommentReplyViewController<VideoItemModel>(with: self.colorScheme, item: self.data, comment: comment, moduleId: self.moduleId)
             vc.canComment = self.canComment
             vc.onReplyPosted = {
                 self.loadComments { comments in

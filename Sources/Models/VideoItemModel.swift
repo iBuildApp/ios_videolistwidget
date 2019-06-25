@@ -78,3 +78,7 @@ extension VideoItemModel {
         //        return String(url[range])
     }
 }
+
+extension VideoItemModel: CommentItemType {
+    static var type: String = "video"
+}
