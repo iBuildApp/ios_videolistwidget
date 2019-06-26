@@ -33,12 +33,34 @@ class VideoListViewController: BaseListViewController<VideoItemCell> {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.tableView.separatorStyle = .singleLine
+        self.tableView.separatorColor = .white
         self.onItemSelect = { item in
             let vc = VideoDetailsViewController(with: self.colorScheme, data: item, moduleId: self.data?.moduleId)
             vc.canShare = self.data?.canShare ?? false
             vc.canLike = self.data?.canLike ?? false
             vc.canComment = self.data?.canComment ?? false
             self.navigationController?.pushViewController(vc, animated: true)
+        }
+        
+        self.onItemAction = { item in
+            guard let app = AppManager.manager.appModel(), let appConfig = AppManager.manager.config() else { return }
+            let url = item.url
+            let appName = app.design?.appName ?? ""
+            var message = String(format: Localization.VideoList.Share.message, url, appName)
+            let showLink = app.design?.isShowLink ?? false
+            if showLink {
+                let link = "https://ibuildapp.com/projects.php?action=info&projectid=\(appConfig.appID)"
+                message.append("\n")
+                message.append(String(format: Localization.VideoList.Share.link, appName, link))
+                message.append("\n")
+                message.append(Localization.VideoList.Share.postedVia)
+            }
+            
+            let textToShare = [ message ]
+            let activityViewController = UIActivityViewController(activityItems: textToShare, applicationActivities: nil)
+            activityViewController.popoverPresentationController?.sourceView = self.view
+            self.present(activityViewController, animated: true, completion: nil)
         }
     }
 }

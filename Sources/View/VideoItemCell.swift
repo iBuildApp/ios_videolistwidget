@@ -29,7 +29,7 @@ class VideoItemCell: UITableViewCell, BaseCellType {
     
     public let shareButton = UIButton(type: .custom)
     
-    public var onShare: ((_ model: ModelType) -> Void)?
+    public var onAction: ((ModelType) -> Void)?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -56,11 +56,12 @@ class VideoItemCell: UITableViewCell, BaseCellType {
         shareButton.setTitleColor(.gray, for: .normal)
         shareButton.titleLabel?.font = .systemFont(ofSize: 16.0)
         shareButton.setImage(getCoreUIImage(with: "share"), for: .normal)
-        
+        shareButton.titleEdgeInsets = .init(top: 0, left: 8, bottom: 0, right: -8)
+        shareButton.contentEdgeInsets = .init(top: 0, left: 0, bottom: 0, right: 8)
         shareButton.sizeToFit()
         
         // Use contentView as the root flex container
-        contentView.flex.padding(10, 10, 0, 10).addItem().padding(10).backgroundColor(.white).define { flex in
+        contentView.flex.padding(10).addItem().padding(10).define { flex in
             flex.addItem(previewImageView).maxHeight(200).shrink(1)
             flex.addItem(titleLabel).marginTop(padding)
             flex.addItem().direction(.row).justifyContent(.spaceBetween).define({ flex in
@@ -125,7 +126,7 @@ class VideoItemCell: UITableViewCell, BaseCellType {
     
     @objc func share() {
         if let model = model {
-            onShare?(model)
+            onAction?(model)
         }
     }
 }
