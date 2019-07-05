@@ -145,7 +145,7 @@ public class VideoDetailsView: UIView {
         contentTextView.flex.markDirty()
 
         if let url = model.coverImageUrl {
-            imageView.setImage(url: url, placeholder: getCoreUIImage(with: "placeholder_image"))
+            imageView.kf.setImage(with: url, placeholder: getCoreUIImage(with: "placeholder_image"))
         }
         flex.layout()
         
