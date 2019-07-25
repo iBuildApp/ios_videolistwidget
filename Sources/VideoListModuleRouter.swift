@@ -23,7 +23,7 @@ public class VideoListModuleRouter: BaseRouter<VideoListModuleRoute> {
     }
 
     public override func prepareTransition(for route: VideoListModuleRoute) -> RouteTransition {
-        return RouteTransition(module: generateRootViewController(), isAnimated: true, showNavigationBar: true, showTabBar: false)
+        return RouteTransition(module: generateRootViewController(), isAnimated: true)
     }
 
     public override func rootTransition() -> RouteTransition {
