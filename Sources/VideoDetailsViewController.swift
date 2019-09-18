@@ -56,6 +56,16 @@ class VideoDetailsViewController: BaseViewController {
         }
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         mainView.onPlay = {
@@ -64,14 +74,84 @@ class VideoDetailsViewController: BaseViewController {
             if self.data?.isYoutube ?? false, let yid = self.data?.youtubeId {
                 XCDYouTubeClient.default().getVideoWithIdentifier(yid, completionHandler: { (video, error) in
                     if error == nil, let video = video {
-                        if let videoURL = video.streamURLs[XCDYouTubeVideoQualityHTTPLiveStreaming] ?? video.streamURLs[XCDYouTubeVideoQuality.HD720] ?? video.streamURLs[136] ?? video.streamURLs[135] ?? video.streamURLs[134] {
-                            
-                            let player = AVPlayer(url: videoURL)
+//                        YouTube video stream format codes
+//                        https://gist.github.com/sidneys/7095afe4da4ae58694d128b1034e01e2
+//
+//                        18    mp4    audio/video    360p   XCDYouTubeVideoQualityMedium360
+//                        22    mp4    audio/video    720p   XCDYouTubeVideoQualityHD720
+//                        37    mp4    audio/video    1080p
+//
+//                        82    mp4    audio/video    360p
+//                        83    mp4    audio/video    480p
+//                        84    mp4    audio/video    720p
+//                        85    mp4    audio/video    1080p
+//
+//                        92    hls    audio/video    240p
+//                        93    hls    audio/video    360p
+//                        94    hls    audio/video    480p
+//                        95    hls    audio/video    720p
+//                        96    hls    audio/video    1080p
+//                        132    hls    audio/video    240p
+                        
+                        let vidoeUrls = video.streamURLs
+                        var vidoeStreamingUrl: URL?
+                        
+                        innerLoop: for (key, value) in vidoeUrls {
+                            switch key.hashValue {
+                            case AnyHashable(XCDYouTubeVideoQualityHTTPLiveStreaming).hashValue:
+                                vidoeStreamingUrl = value
+                                break innerLoop
+
+                            case AnyHashable(XCDYouTubeVideoQuality.HD720).hashValue:
+                                vidoeStreamingUrl = value
+                                break innerLoop
+
+                            case AnyHashable(84).hashValue:
+                                vidoeStreamingUrl = value
+                                break innerLoop
+
+                            case AnyHashable(37).hashValue:
+                                vidoeStreamingUrl = value
+                                break innerLoop
+
+                            case AnyHashable(85).hashValue:
+                                vidoeStreamingUrl = value
+                                break innerLoop
+
+                            case AnyHashable(83).hashValue:
+                                vidoeStreamingUrl = value
+                                break innerLoop
+
+                            case AnyHashable(XCDYouTubeVideoQuality.medium360).hashValue:
+                                vidoeStreamingUrl = value
+                                break innerLoop
+
+                            case AnyHashable(82).hashValue:
+                                vidoeStreamingUrl = value
+                                break innerLoop
+
+                            case AnyHashable(XCDYouTubeVideoQuality.small240).hashValue:
+                                vidoeStreamingUrl = value
+                                break innerLoop
+
+                            default: continue
+                            }
+                        }
+                        
+                        if let videoUrl = vidoeStreamingUrl {
+                            let player = AVPlayer(url: videoUrl)
                             let playerController = AVPlayerViewController()
                             playerController.player = player
+                            playerController.allowsPictureInPicturePlayback = false
+                            if #available(iOS 11.0, *) {
+                                playerController.entersFullScreenWhenPlaybackBegins = true
+                                playerController.exitsFullScreenWhenPlaybackEnds = true
+                            }
                             self.present(playerController, animated: true) {
                                 player.play()
                             }
+                        } else if UIApplication.shared.canOpenURL(url) {
+                            UIApplication.shared.open(url, options: [:], completionHandler: nil)
                         }
                     } else {
                         print("Error: \(error!.localizedDescription)")
@@ -89,13 +169,15 @@ class VideoDetailsViewController: BaseViewController {
                         return
                     }
                     
-                    if let videoURL = vid.videoURL[.Quality720p] {
+                    if let videoURL = vid.videoURL[.Quality720p] ?? vid.videoURL[.Quality960p] ?? vid.videoURL[.Quality1080p] ?? vid.videoURL[.Quality640p] ?? vid.videoURL[.Quality540p] ?? vid.videoURL[.Quality360p] {
                         let player = AVPlayer(url: videoURL)
                         let playerController = AVPlayerViewController()
                         playerController.player = player
                         self.present(playerController, animated: true) {
                             player.play()
                         }
+                    } else if UIApplication.shared.canOpenURL(url) {
+                        UIApplication.shared.open(url, options: [:], completionHandler: nil)
                     }
                 })
             } else {
